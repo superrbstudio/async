@@ -1,0 +1,20 @@
+{
+    "name": "superrb/async",
+    "description": "A PHP library for handling asynchronous processes",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": { "": "src/" },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "James Dinsdale",
+            "email": "hi@molovo.co"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
