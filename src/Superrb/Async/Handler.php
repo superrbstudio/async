@@ -4,7 +4,6 @@ namespace Superrb\Async;
 
 use BadMethodCallException;
 use Closure;
-use Doctrine\Common\Collections\ArrayCollection;
 use Generator;
 use ReflectionFunction;
 use RuntimeException;
@@ -47,9 +46,9 @@ class Handler
     private $pid;
 
     /**
-     * An ArrayCollection containing messages from child processes.
+     * An array containing messages from child processes.
      *
-     * @var ArrayCollection
+     * @var array
      */
     private $messages;
 
