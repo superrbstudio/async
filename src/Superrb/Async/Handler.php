@@ -246,6 +246,16 @@ class Handler
     }
 
     /**
+     * Check if the handler has any messages from child processes.
+     *
+     * @return bool
+     */
+    public function hasMessages(): bool
+    {
+        return count($this->messages) > 0;
+    }
+
+    /**
      * Get any messages received from child processes.
      *
      * @return Generator
