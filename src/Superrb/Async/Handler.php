@@ -1,12 +1,13 @@
 <?php
+
 namespace Superrb\Async;
 
-use RuntimeException;
 use BadMethodCallException;
 use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Generator;
 use ReflectionFunction;
+use RuntimeException;
 
 class Handler
 {
@@ -71,24 +72,24 @@ class Handler
             throw new RuntimeException('The pcntl functions cannot be found. Is the pcntl extension installed?');
         }
 
-        $this->handler = $handler;
-        $this->async = $async;
-        $this->messages = new ArrayCollection();
+        $this->handler  = $handler;
+        $this->async    = $async;
+        $this->messages = [];
 
         $ref = new ReflectionFunction($handler);
 
-        if ((string)$ref->getReturnType() !== 'bool') {
+        if ((string) $ref->getReturnType() !== 'bool') {
             throw new BadMethodCallException('Closures for forked processes must return a boolean to indicate success/failure');
         }
     }
 
     /**
      * Check if the system has support for the pcntl functions
-     * used by this library
+     * used by this library.
      *
      * @return bool
      */
-    public function isSupported() : bool
+    public function isSupported(): bool
     {
         return function_exists('pcntl_fork');
     }
@@ -100,7 +101,7 @@ class Handler
      *
      * @return self
      */
-    public function setMessageBuffer(int $buffer) : self
+    public function setMessageBuffer(int $buffer): self
     {
         $this->messageBuffer = $buffer;
 
@@ -114,7 +115,7 @@ class Handler
      *
      * @return bool
      */
-    public function run(...$args) : bool
+    public function run(...$args): bool
     {
         $this->channel = new Channel($this->messageBuffer);
 
@@ -164,7 +165,7 @@ class Handler
      *
      * @return bool
      */
-    public function wait() : bool
+    public function wait(): bool
     {
         if (!$this->pid) {
             throw new BadMethodCallException('wait can only be called from the parent of a forked process');
@@ -180,7 +181,7 @@ class Handler
 
         // Capture any messages returned by the child process
         if ($msg = $this->channel->receive()) {
-            $this->messages->add($msg);
+            $this->messages[] = $msg;
         }
 
         // If the process did not exit gracefully, mark it as failed
@@ -199,7 +200,7 @@ class Handler
      *
      * @return bool Whether ANY of the child processes failed
      */
-    public function waitAll() : bool
+    public function waitAll(): bool
     {
         if (!$this->pid) {
             throw new BadMethodCallException('waitAll can only be called from the parent of a forked process');
@@ -209,8 +210,8 @@ class Handler
             throw new BadMethodCallException('waitAll can only be used with asynchronous forked processes');
         }
 
-        $statuses = [];
-        $this->messages = new ArrayCollection();
+        $statuses       = [];
+        $this->messages = [];
 
         // We loop through each of the async channels in turn.
         // Although this means the loop will check each process in
@@ -223,7 +224,7 @@ class Handler
 
             // Capture any messages returned by the child process
             if ($msg = $channel->receive()) {
-                $this->messages->add($msg);
+                $this->messages[] = $msg;
             }
 
             // If the process exited gracefully, report success/failure
@@ -250,7 +251,7 @@ class Handler
      *
      * @return Generator
      */
-    public function getMessages() : Generator
+    public function getMessages(): Generator
     {
         if (!$this->pid) {
             throw new BadMethodCallException('getMessages can only be called from the parent of a forked process');
@@ -269,9 +270,9 @@ class Handler
      *
      * @return self
      */
-    public function clearMessages() : self
+    public function clearMessages(): self
     {
-        $this->messages = new ArrayCollection();
+        $this->messages = [];
 
         return $this;
     }
