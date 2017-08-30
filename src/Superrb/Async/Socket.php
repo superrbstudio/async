@@ -56,7 +56,6 @@ class Socket
 
         // Check the message fits within the buffer
         if (strlen($msg) > $this->buffer) {
-            var_dump($msg);
             throw new SocketCommunicationException('Tried to send data larger than buffer size of '.$this->buffer.' bytes. Recreate channel with a larger buffer to send this data');
         }
 
