@@ -1,4 +1,5 @@
 <?php
+
 namespace Superrb\Async;
 
 class Channel
@@ -36,13 +37,13 @@ class Channel
         $this->domain = (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? AF_INET : AF_UNIX);
 
         if (socket_create_pair($this->domain, SOCK_STREAM, 0, $sockets) === false) {
-            throw new SocketCreationException('Socket pair failed to create: ' . socket_strerror(socket_last_error()));
+            throw new SocketCreationException('Socket pair failed to create: '.socket_strerror(socket_last_error()));
         }
 
         [$parent, $child] = $sockets;
 
         $this->parent = new Socket($parent, $buffer);
-        $this->child = new Socket($child, $buffer);
+        $this->child  = new Socket($child, $buffer);
     }
 
     /**
@@ -61,7 +62,7 @@ class Channel
      *
      * @return Socket
      */
-    public function getParentSocket()
+    public function getParentSocket(): Socket
     {
         return $this->parent;
     }
@@ -71,7 +72,7 @@ class Channel
      *
      * @return Socket
      */
-    public function getChildSocket()
+    public function getChildSocket(): Socket
     {
         return $this->child;
     }
@@ -79,11 +80,11 @@ class Channel
     /**
      * Send a message to the child socket.
      *
-     * @param string|array|object $msg
+     * @param mixed $msg
      *
      * @return bool
      */
-    public function send($msg)
+    public function send($msg): bool
     {
         // Channel communication within processes is one way,
         // so we cascade the call straight to the child socket

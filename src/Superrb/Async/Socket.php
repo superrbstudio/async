@@ -40,7 +40,7 @@ class Socket
     /**
      * Send a message to the socket.
      *
-     * @param string|array|object $msg
+     * @param mixed $msg
      *
      * @return bool
      */
@@ -69,7 +69,7 @@ class Socket
     /**
      * Receive data from the socket.
      *
-     * @return string|array|object|null
+     * @return mixed
      */
     public function receive()
     {
