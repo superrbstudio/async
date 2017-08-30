@@ -1,4 +1,5 @@
 <?php
+
 namespace Superrb\Async;
 
 use BadMethodCallException;
@@ -43,7 +44,7 @@ class Socket
      *
      * @return bool
      */
-    public function send($msg) : bool
+    public function send($msg): bool
     {
         // JSON encode message if supplied in array or object form
         if (is_array($msg) || is_object($msg)) {
@@ -51,12 +52,12 @@ class Socket
         }
 
         // Ensure message is a string
-        $msg = (string)$msg;
+        $msg = (string) $msg;
 
         // Check the message fits within the buffer
         if (strlen($msg) > $this->buffer) {
             var_dump($msg);
-            throw new SocketCommunicationException('Tried to send data larger than buffer size of ' . $this->buffer . ' bytes. Recreate channel with a larger buffer to send this data');
+            throw new SocketCommunicationException('Tried to send data larger than buffer size of '.$this->buffer.' bytes. Recreate channel with a larger buffer to send this data');
         }
 
         // Pad the message to the buffer size
@@ -67,14 +68,14 @@ class Socket
     }
 
     /**
-     * Recieve data from the socket.
+     * Receive data from the socket.
      *
      * @return string|array|object|null
      */
     public function receive()
     {
         // Read data from the socket
-        $msg = socket_read($this->socket, $this->buffer, PHP_BINARY_READ);
+        socket_recv($this->socket, $msg, $this->buffer, MSG_DONTWAIT);
 
         if ($msg === false) {
             return null;
@@ -95,7 +96,7 @@ class Socket
     /**
      * Close the socket.
      */
-    public function close() : void
+    public function close(): void
     {
         socket_close($this->socket);
     }
