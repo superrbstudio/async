@@ -229,13 +229,13 @@ class Handler
             // If the process exited gracefully, report success/failure
             // base on the exit status
             if (pcntl_wifexited($status)) {
-                $statuses[] = (pcntl_wexitstatus($status) === 0);
+                $statuses[$pid] = (pcntl_wexitstatus($status) === 0);
                 continue;
             }
 
             // In all other cases, the process failed for another reason,
             // so we mark it as failed
-            $statuses[] = false;
+            $statuses[$pid] = false;
         }
 
         // Filter the array of statuses, and check whether the count
