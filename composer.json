@@ -1,8 +1,18 @@
 {
     "name": "superrb/async",
-    "description": "A PHP library for handling asynchronous processes",
+    "description": "A PHP library for handling asynchronous processes and inter-process communication via sockets",
+    "homepage": "https://github.com/superrbstudio/async",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+      "async",
+      "asynchronous",
+      "fork",
+      "subprocess",
+      "threads",
+      "socket",
+      "socket-communication"
+    ],
     "autoload": {
         "psr-4": { "": "src/" },
         "files": [
