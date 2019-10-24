@@ -46,13 +46,7 @@ class Socket
      */
     public function send($msg): bool
     {
-        // JSON encode message if supplied in array or object form
-        if (is_array($msg) || is_object($msg)) {
-            $msg = json_encode($msg);
-        }
-
-        // Ensure message is a string
-        $msg = (string) $msg;
+        $msg = $this->encode($msg);
 
         // Check the message fits within the buffer
         if (strlen($msg) > $this->buffer) {
@@ -76,20 +70,7 @@ class Socket
         // Read data from the socket
         socket_recv($this->socket, $msg, $this->buffer, MSG_DONTWAIT);
 
-        if ($msg === false) {
-            return null;
-        }
-
-        // Trim the padding from the message content
-        $msg = trim($msg);
-
-        // If message is not valid JSON, return it verbatim
-        if (json_decode($msg) === null) {
-            return $msg;
-        }
-
-        // Decode and return the message content
-        return json_decode($msg);
+        return $this->decode($msg);
     }
 
     /**
@@ -98,5 +79,42 @@ class Socket
     public function close(): void
     {
         socket_close($this->socket);
+    }
+
+    /**
+     * @param mixed $msg
+     *
+     * @return string
+     */
+    public function encode($msg): string
+    {
+        // JSON encode message if supplied in array or object form
+        if (is_array($msg) || is_object($msg)) {
+            $msg = json_encode($msg);
+        }
+
+        // Ensure message is a string
+        return (string) $msg;
+    }
+
+    /**
+     * @param string $msg
+     */
+    public function decode(?string $msg = null)
+    {
+        if (false === $msg || null === $msg) {
+            return null;
+        }
+
+        // Trim the padding from the message content
+        $msg = trim($msg);
+
+        // If message is not valid JSON, return it verbatim
+        if (null === json_decode($msg)) {
+            return $msg;
+        }
+
+        // Decode and return the message content
+        return json_decode($msg);
     }
 }

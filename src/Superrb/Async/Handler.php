@@ -18,6 +18,11 @@ class Handler
     private $async;
 
     /**
+     * @var bool
+     */
+    private $debug = false;
+
+    /**
      * Communications channels for asynchronous processes.
      *
      * @var Channel[]
@@ -50,7 +55,7 @@ class Handler
      *
      * @var array
      */
-    private $messages;
+    private $messages = [];
 
     /**
      * The message buffer size.
@@ -77,9 +82,29 @@ class Handler
 
         $ref = new ReflectionFunction($handler);
 
-        if ((string) $ref->getReturnType() !== 'bool') {
+        if ('bool' !== (string) $ref->getReturnType()) {
             throw new BadMethodCallException('Closures for forked processes must return a boolean to indicate success/failure');
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDebug(): bool
+    {
+        return $this->debug;
+    }
+
+    /**
+     * @param bool $debug
+     *
+     * @return self
+     */
+    public function setDebug(bool $debug): self
+    {
+        $this->debug = $debug;
+
+        return $this;
     }
 
     /**
@@ -116,7 +141,16 @@ class Handler
      */
     public function run(...$args): bool
     {
-        $this->channel = new Channel($this->messageBuffer);
+        $this->channel = new Channel($this, $this->messageBuffer);
+
+        // If the debug flag is set, we run the handler without forking so that
+        // we can see and handle any errors within
+        if ($this->debug) {
+            $handler = $this->handler;
+            $handler = $handler->bindTo($this->channel);
+
+            return $handler(...$args);
+        }
 
         $this->pid = pcntl_fork();
 
@@ -189,7 +223,7 @@ class Handler
         }
 
         // If the process exited gracefully, check the exit code
-        return pcntl_wexitstatus($status) === 0;
+        return 0 === pcntl_wexitstatus($status);
     }
 
     /**
@@ -229,7 +263,7 @@ class Handler
             // If the process exited gracefully, report success/failure
             // base on the exit status
             if (pcntl_wifexited($status)) {
-                $statuses[$pid] = (pcntl_wexitstatus($status) === 0);
+                $statuses[$pid] = (0 === pcntl_wexitstatus($status));
                 continue;
             }
 
@@ -240,9 +274,9 @@ class Handler
 
         // Filter the array of statuses, and check whether the count
         // of failed processes is greater than zero
-        return count(array_filter($statuses, function (int $status) {
-            return $status !== 0;
-        })) === 0;
+        return 0 === count(array_filter($statuses, function (int $status) {
+            return 0 !== $status;
+        }));
     }
 
     /**
@@ -262,7 +296,7 @@ class Handler
      */
     public function getMessages(): Generator
     {
-        if (!$this->pid) {
+        if (!$this->debug && !$this->pid) {
             throw new BadMethodCallException('getMessages can only be called from the parent of a forked process');
         }
 
@@ -270,6 +304,18 @@ class Handler
         foreach ($this->messages as $message) {
             yield $message;
         }
+    }
+
+    /**
+     * @param mixed $msg
+     *
+     * @return self
+     */
+    public function addMessage($msg): self
+    {
+        $this->messages[] = $msg;
+
+        return $this;
     }
 
     /**

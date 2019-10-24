@@ -5,6 +5,13 @@ namespace Superrb\Async;
 class Channel
 {
     /**
+     * The handler which owns this channel.
+     *
+     * @var Handler
+     */
+    private $handler;
+
+    /**
      * The socket domain to use.
      *
      * @var int
@@ -29,14 +36,17 @@ class Channel
      * Creates a socket pairing which can be used to communicate between
      * asynchronous running processes.
      *
-     * @param int $buffer
+     * @param int     $buffer
+     * @param Handler $handler
      */
-    public function __construct(int $buffer = 1024)
+    public function __construct(Handler $handler, int $buffer = 1024)
     {
-        // On Windows we need to use AF_INET
-        $this->domain = (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' ? AF_INET : AF_UNIX);
+        $this->handler = $handler;
 
-        if (socket_create_pair($this->domain, SOCK_STREAM, 0, $sockets) === false) {
+        // On Windows we need to use AF_INET
+        $this->domain = ('WIN' == strtoupper(substr(PHP_OS, 0, 3)) ? AF_INET : AF_UNIX);
+
+        if (false === socket_create_pair($this->domain, SOCK_STREAM, 0, $sockets)) {
             throw new SocketCreationException('Socket pair failed to create: '.socket_strerror(socket_last_error()));
         }
 
@@ -86,6 +96,14 @@ class Channel
      */
     public function send($msg): bool
     {
+        // In debug mode, bypass the socket and just store messages directly
+        // against the handler, mimicking the encode/decode process
+        if ($this->handler->isDebug()) {
+            $this->handler->addMessage($this->child->decode($this->child->encode($msg)));
+
+            return true;
+        }
+
         // Channel communication within processes is one way,
         // so we cascade the call straight to the child socket
         return $this->child->send($msg);
