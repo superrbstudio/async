@@ -217,6 +217,8 @@ class Handler
             $this->messages[] = $msg;
         }
 
+        $this->channel->close();
+
         // If the process did not exit gracefully, mark it as failed
         if (!pcntl_wifexited($status)) {
             return false;
@@ -259,6 +261,8 @@ class Handler
             if ($msg = $channel->receive()) {
                 $this->messages[] = $msg;
             }
+
+            $channel->close();
 
             // If the process exited gracefully, report success/failure
             // base on the exit status

@@ -61,6 +61,11 @@ class Channel
      */
     public function __destruct()
     {
+        $this->close();
+    }
+
+    public function close(): void
+    {
         $this->parent->close();
         $this->parent = null;
         $this->child->close();
