@@ -35,9 +35,6 @@ class Channel
     /**
      * Creates a socket pairing which can be used to communicate between
      * asynchronous running processes.
-     *
-     * @param int     $buffer
-     * @param Handler $handler
      */
     public function __construct(Handler $handler, int $buffer = 1024)
     {
@@ -74,8 +71,6 @@ class Channel
 
     /**
      * Get the parent socket from the pairing.
-     *
-     * @return Socket
      */
     public function getParentSocket(): Socket
     {
@@ -84,8 +79,6 @@ class Channel
 
     /**
      * Get the child socket from the pairing.
-     *
-     * @return Socket
      */
     public function getChildSocket(): Socket
     {
@@ -96,8 +89,6 @@ class Channel
      * Send a message to the child socket.
      *
      * @param mixed $msg
-     *
-     * @return bool
      */
     public function send($msg): bool
     {

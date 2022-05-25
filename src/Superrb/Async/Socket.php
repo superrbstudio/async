@@ -2,15 +2,14 @@
 
 namespace Superrb\Async;
 
-use BadMethodCallException;
-use resource;
+use Socket as GlobalSocket;
 
 class Socket
 {
     /**
      * The socket which this process reads and writes to.
      *
-     * @var resource
+     * @var GlobalSocket
      */
     private $socket;
 
@@ -23,16 +22,9 @@ class Socket
 
     /**
      * Create the socket handler.
-     *
-     * @param resource $socket
-     * @param int      $buffer
      */
-    public function __construct($socket, int $buffer = 1024)
+    public function __construct(GlobalSocket $socket, int $buffer = 1024)
     {
-        if (!is_resource($socket)) {
-            throw new BadMethodCallException('$socket must be a resource');
-        }
-
         $this->socket = $socket;
         $this->buffer = $buffer;
     }
@@ -41,8 +33,6 @@ class Socket
      * Send a message to the socket.
      *
      * @param mixed $msg
-     *
-     * @return bool
      */
     public function send($msg): bool
     {
@@ -83,8 +73,6 @@ class Socket
 
     /**
      * @param mixed $msg
-     *
-     * @return string
      */
     public function encode($msg): string
     {
