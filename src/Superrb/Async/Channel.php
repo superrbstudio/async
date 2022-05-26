@@ -63,10 +63,15 @@ class Channel
 
     public function close(): void
     {
-        $this->parent->close();
-        $this->parent = null;
-        $this->child->close();
-        $this->child = null;
+        if ($this->parent) {
+            $this->parent->close();
+            $this->parent = null;
+        }
+
+        if ($this->child) {
+            $this->child->close();
+            $this->child = null;
+        }
     }
 
     /**
